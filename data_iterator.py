@@ -1,9 +1,12 @@
 import numpy as np
-
+import gzip
 class DataIterator:
 
     def __init__(self, source, batch_size=256, max_batch_size=20):
-        self.source = open(source, 'r')
+        if source.endswith(".gz"):
+            self.source=gzip.open(source, 'rb')
+        else:
+            self.source = open(source, 'r')
         self.source_dicts = []
         self.batch_size = batch_size
         self.source_buffer = []
@@ -28,6 +31,8 @@ class DataIterator:
         if len(self.source_buffer) == 0:
             for k_ in range(self.k):
                 ss = self.source.readline()
+                if not isinstance(ss,str):
+                    ss=ss.decode("utf-8")
                 if ss == "":
                     break
                 self.source_buffer.append(ss.strip("\n").split(","))

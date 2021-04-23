@@ -8,8 +8,8 @@ import sys
 import random
 from datetime import timedelta, datetime
 
-num_epochs = 1
-batch_size = 256
+num_epochs = 100
+batch_size = 4 #256
 window_size = 50
 starter_learning_rate = 0.001
 learning_rate_decay = 1.0
@@ -20,7 +20,7 @@ ckpt_dir = './dmr_' + today_format
 
 
 def train():
-    train_data = DataIterator('alimama.txt', batch_size, 20)
+    train_data = DataIterator('alimama_test.txt.gz', batch_size, 20)
     global_step = tf.Variable(0, name="global_step", trainable=False)
     learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step, 2000000, learning_rate_decay, staircase=True)
     # construct the model structure
