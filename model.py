@@ -36,12 +36,14 @@ class Model(object):
             self.feature_ph = tf.placeholder(tf.float32, [None, None], name='feature_ph')
             self.target_ph = tf.placeholder(tf.float32, [None, ], name='target_ph')
 
+            ## behavior history feature
             self.btag_his = tf.cast(self.feature_ph[:, 0:50], tf.int32)
             self.cate_his = tf.cast(self.feature_ph[:, 50:100], tf.int32)
             self.brand_his = tf.cast(self.feature_ph[:, 100:150], tf.int32)
             self.mask = tf.cast(self.feature_ph[:, 150:200], tf.int32)
             self.match_mask = tf.cast(self.feature_ph[:, 200:250], tf.int32)
 
+            #user side features
             self.uid = tf.cast(self.feature_ph[:, 250], tf.int32)
             self.cms_segid = tf.cast(self.feature_ph[:, 251], tf.int32)
             self.cms_group_id = tf.cast(self.feature_ph[:, 252], tf.int32)
@@ -52,6 +54,7 @@ class Model(object):
             self.occupation = tf.cast(self.feature_ph[:, 257], tf.int32)
             self.new_user_class_level = tf.cast(self.feature_ph[:, 258], tf.int32)
 
+            ##ad side features
             self.mid = tf.cast(self.feature_ph[:, 259], tf.int32)
             self.cate_id = tf.cast(self.feature_ph[:, 260], tf.int32)
             self.campaign_id = tf.cast(self.feature_ph[:, 261], tf.int32)

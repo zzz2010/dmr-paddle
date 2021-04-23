@@ -16,7 +16,7 @@ class DataIterator:
     def reset(self):
         self.source.seek(0)
 
-    def next(self):
+    def __next__(self):
         if self.end_of_data:
             self.end_of_data = False
             self.reset()
@@ -26,7 +26,7 @@ class DataIterator:
         target = []
 
         if len(self.source_buffer) == 0:
-            for k_ in xrange(self.k):
+            for k_ in range(self.k):
                 ss = self.source.readline()
                 if ss == "":
                     break
@@ -54,7 +54,7 @@ class DataIterator:
             self.end_of_data = True
 
         if len(source) == 0 or len(target) == 0:
-            source, target = self.next()
+            source, target = self.__next__()
 
         source = np.array(source, np.float32)
         target = np.array(target, np.float32)
