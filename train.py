@@ -3,7 +3,7 @@
 from model import *
 from data_iterator import *
 import numpy as np
-import tensorflow as tf
+import paddtf as tf
 import sys
 import random
 from datetime import timedelta, datetime
@@ -20,8 +20,9 @@ ckpt_dir = './dmr_' + today_format
 
 
 def train():
-    train_data = DataIterator('alimama_test.txt.gz', batch_size, 20)
-    global_step = tf.Variable(0, name="global_step", trainable=False)
+    train_data = DataIterator('alimama_sampled.txt', batch_size, 20)
+    global_step = tf.Variable(value=0, name="global_step", trainable=False)
+    print(global_step)
     learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step, 2000000, learning_rate_decay,
                                                staircase=True)
     # construct the model structure
@@ -110,6 +111,7 @@ if __name__ == "__main__":
     tf.set_random_seed(SEED)
     np.random.seed(SEED)
     random.seed(SEED)
+    print(sys.argv)
     if sys.argv[1] == 'train':
         train()
     elif sys.argv[1] == 'test':

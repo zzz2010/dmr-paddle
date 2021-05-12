@@ -1,4 +1,4 @@
-import tensorflow as tf
+import paddtf as tf
 import numpy as np
 
 

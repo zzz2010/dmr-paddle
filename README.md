@@ -7,3 +7,4 @@ This code for DMR is implemented based on the Alimama Dataset (https://tianchi.a
 
 Notice that, the user behavior data in this dataset contains only category, brand and behavior type, but no item.
 
+run "export LD_LIBRARY_PATH='/usr/local/cuda-10.0/lib64/'" before import paddle

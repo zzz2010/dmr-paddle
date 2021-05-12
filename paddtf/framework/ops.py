@@ -16,3 +16,6 @@ def name_scope(prefix=None):
             yield
         finally:
             _name_scope = _name_scope.parent()
+
+def control_dependencies(control_inputs):
+    print("control_dependencies not implemented.")
