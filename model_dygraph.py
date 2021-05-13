@@ -229,9 +229,24 @@ class Model(paddle.nn.Layer):
             if self.target_ph is not None:
                 # Cross-entropy loss and optimizer initialization
                 # print("mean self.target_ph:",paddle.mean(self.target_ph.astype("float32")))
+                positive_rate=tf.reduce_mean(self.target_ph.astype("float32"))
+                ##rebalance the class weight
+                weights=paddle.index_select(tf.concat([positive_rate,1-positive_rate],0), self.target_ph.astype("int"))
+                # print(weights.shape)
                 ctr_loss = tf.reduce_mean(
-                    tf.nn.sigmoid_cross_entropy_with_logits(labels=self.target_ph, logits=tf.reduce_sum(dnn3, 1)))
+                    tf.nn.sigmoid_cross_entropy_with_logits(labels=self.target_ph, logits=tf.reduce_sum(dnn3, 1)*weights))
+                
+
+                ####explict optimize AUC based on https://github.com/mlarionov/machine_learning_POC/blob/master/auc/pairwise.ipynb
+                # activations=paddle.reshape(tf.reduce_sum(dnn3, 1),(-1,1))
+                # y=paddle.reshape(self.target_ph.astype("float32") ,(-1,1))
+                # part1=tf.sigmoid(activations @ tf.transpose(activations,[1,0]))
+                # ones_y=paddle.ones(y.shape)
+                # part2=paddle.maximum(y @ tf.transpose(ones_y,[1,0]) - ones_y@ tf.transpose(y,[1,0]),paddle.zeros((y.shape[0],y.shape[0]) ))
+                # ctr_loss = - tf.reduce_mean( part1* part2)*10
+
                 self.ctr_loss = ctr_loss
+             
                 self.loss = ctr_loss + self.aux_loss
                 tf.summary.scalar(tag+'loss', self.loss)
 
