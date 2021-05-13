@@ -32,9 +32,10 @@ def deep_match(self,item_his_eb, context_his_eb, mask, match_mask, mid_his_batch
     diag_vals = tf.ones_like(scores_tile)  # B, T, T
     # tril = tf.contrib.linalg.LinearOperatorTriL(diag_vals).to_dense()
     # TODO LinearOperatorLowerTriangular()
+
     tril = tf.linalg.LinearOperatorLowerTriangular(diag_vals)
     paddings = tf.ones_like(tril) * (-2 ** 32 + 1)
-    scores_tile = tf.where(tf.equal(tril, 0), paddings, scores_tile)  # B, T, T
+    scores_tile = tf.where( tril== 0, paddings, scores_tile)  # B, T, T
     scores_tile = tf.nn.softmax(scores_tile)  # B, T, T
     att_dm_item_his_eb = tf.matmul(scores_tile, item_his_eb)  # B, T, E
 

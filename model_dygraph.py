@@ -75,8 +75,8 @@ class Model(paddle.nn.Layer):
         self.pid_embeddings_var = tf.get_variable("pid_embedding_var", [pid_size, other_embedding_size])
 
 
-        self.bn_inp=paddle.nn.BatchNorm(num_channels=in_features)
-        self.f0=paddle.nn.Linear(in_features=in_features,out_features=512)
+        self.bn_inp=paddle.nn.BatchNorm(num_channels=459)
+        self.f0=paddle.nn.Linear(in_features=459,out_features=512)
         self.f1 = paddle.nn.Linear(in_features=512, out_features=256)
         self.prelu0=paddle.nn.PReLU()
         self.prelu1 = paddle.nn.PReLU()
@@ -84,19 +84,19 @@ class Model(paddle.nn.Layer):
         self.prelu2 = paddle.nn.PReLU()
         self.f3 = paddle.nn.Linear(in_features=128, out_features=1)
 
-        out_features=999 ##determinte later
+        out_features=64
         self.dm_align=paddle.nn.Linear(in_features=in_features,out_features=out_features)
-        self.dm_att_1=paddle.nn.Linear(in_features=out_features,out_features=80)
+        self.dm_att_1=paddle.nn.Linear(in_features=256,out_features=80)
         self.dm_att_2=paddle.nn.Linear(in_features=80,out_features=40)
         self.dm_att_3 = paddle.nn.Linear(in_features=40, out_features=1)
         EMBEDDING_DIM =main_embedding_size
-        self.dm_fcn_1 = paddle.nn.Linear(in_features=40, out_features=EMBEDDING_DIM)
+        self.dm_fcn_1 = paddle.nn.Linear(in_features=64, out_features=EMBEDDING_DIM)
         self.dm_prelu=paddle.nn.PReLU()
         self.dm_fcn_1_prelu = paddle.nn.PReLU()
 
-        query_shape_lastdim=777
-        out_features2=666
-        dmr_all_lastdim=555
+        query_shape_lastdim=80
+        out_features2=64
+        dmr_all_lastdim=256
         self.dmr_align=paddle.nn.Linear(query_shape_lastdim,out_features2)
         self._dmr_prelu_0=paddle.nn.PReLU()
         self.tg_att_1=paddle.nn.Linear(dmr_all_lastdim,80)
@@ -219,7 +219,7 @@ class Model(paddle.nn.Layer):
         inp = self.bn_inp(inp)
         dnn0 = self.f0(inp )
         dnn0 = self.prelu0(dnn0 )
-        dnn1 = self.f1(dnn0, 256, activation=None, name='f1')
+        dnn1 = self.f1(dnn0 )
         dnn1 = self.prelu0(dnn1 )
         dnn2 = self.f2(dnn1 )
         dnn2 = self.prelu2(dnn2 )

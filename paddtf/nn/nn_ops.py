@@ -4,8 +4,9 @@ def softmax(x):
     return paddle.nn.functional.softmax(x, axis=- 1, dtype=None, name=None)
 
 
-def sampled_softmax_loss(weights,labels,inputs,num_sampled,sampled_values):
-    return paddle.nn.functional.softmax_with_cross_entropy(logits=inputs,
+def sampled_softmax_loss(weights,biases,labels,inputs,num_sampled=0,num_classes=None,sampled_values=None):
+    outputs=paddle.matmul(inputs,weights,transpose_y=True)+paddle.reshape(biases,(1,-1))
+    return paddle.nn.functional.softmax_with_cross_entropy(logits=outputs,
                                                            label=labels,
                                                            soft_label=False,
                                                            ignore_index=- 100,

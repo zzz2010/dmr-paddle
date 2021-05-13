@@ -22,7 +22,7 @@ today_format = today.strftime('%Y%m%d')
 ckpt_dir = 'ckpt/dmr_' + today_format
 os.makedirs(ckpt_dir,exist_ok=True)
 
-in_features = 111
+in_features = 16
 def train():
     train_data = DataIterator('alimama_sampled.txt', batch_size, 20)
 
@@ -49,7 +49,7 @@ def train():
         accuracy_sum += acc.numpy()
         aux_loss_sum += aux_loss.numpy()
         prob_1 = prob.numpy()[:, 0].tolist()
-        target_1 = targets.numpy().tolist()
+        target_1 = targets.tolist()
         for p, t in zip(prob_1, target_1):
             stored_arr.append([p, t])
         iter += 1
@@ -89,7 +89,7 @@ def eval():
         accuracy_sum += acc.numpy()
         aux_loss_sum += aux_loss.numpy()
         prob_1 = prob[:, 0].numpy().tolist()
-        target_1 = targets.numpy().tolist()
+        target_1 = targets.tolist()
         for p, t in zip(prob_1, target_1):
             stored_arr.append([p, t])
         iter += 1

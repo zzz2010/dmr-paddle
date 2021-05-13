@@ -6,8 +6,8 @@ def cast(x, dtype, name=None):
     return paddle.cast(x, dtype)
 
 
-def reduce_sum(input_tensor, axis=None, keepdims=None):
-    return paddle.fluid.layers.reduce_sum(input=input_tensor, dim=axis, keep_dim=keepdims, name=None)
+def reduce_sum(input_tensor, axis=None, keep_dims=None):
+    return paddle.fluid.layers.reduce_sum(input=input_tensor, dim=axis, keep_dim=keep_dims, name=None)
 
 
 def sigmoid(x, name=None):

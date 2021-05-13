@@ -1,5 +1,5 @@
 import paddle.nn.initializer
-
+from . import linalg
 from paddtf.framework import name_scope
 from paddtf.ops import *
 from paddtf.layers import *

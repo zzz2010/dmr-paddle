@@ -24,6 +24,8 @@ def transpose(a, perm=None, name="transpose"):
 def ones_like(tensor, dtype=None, name=None):
     return paddle.ones_like(x=tensor, dtype=dtype, name=name)
 
+def zeros_like(tensor, dtype=None, name=None):
+    return paddle.zeros_like(x=tensor, dtype=dtype, name=name)
 
 def where(condition, x=None, y=None, name=None):
     return paddle.where(condition, x, y, name=name)
