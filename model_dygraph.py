@@ -104,8 +104,7 @@ class Model(paddle.nn.Layer):
         self.tg_att_3 = paddle.nn.Linear(40, 1)
         print("finished model initialization")
 
-    def forward(self, feature_ph, target_ph):
-
+    def forward(self, feature_ph, target_ph,tag=""):
 
         self.feature_ph = feature_ph
         self.target_ph = target_ph
@@ -213,7 +212,7 @@ class Model(paddle.nn.Layer):
 
 
 
-    def build_fcn_net(self, inp):
+    def build_fcn_net(self, inp,tag=""):
 
 
         inp = self.bn_inp(inp)
@@ -233,11 +232,11 @@ class Model(paddle.nn.Layer):
                     tf.nn.sigmoid_cross_entropy_with_logits(labels=self.target_ph, logits=tf.reduce_sum(dnn3, 1)))
                 self.ctr_loss = ctr_loss
                 self.loss = ctr_loss + self.aux_loss
-                tf.summary.scalar('loss', self.loss)
+                tf.summary.scalar(tag+'loss', self.loss)
 
                 # Accuracy metric
                 self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.y_hat), self.target_ph), tf.float32))
-                tf.summary.scalar('accuracy', self.accuracy)
+                tf.summary.scalar(tag+'accuracy', self.accuracy)
                 return self.y_hat ,self.loss,self.accuracy,self.aux_loss
             else:
                 return self.y_hat ,None,None,None
@@ -247,13 +246,13 @@ class Model(paddle.nn.Layer):
 
     def train_batch(self, sess, features, targets):
         self.train()
-        self.y_hat ,self.loss,self.accuracy,self.aux_loss=self.forward( paddle.to_tensor(features), paddle.to_tensor(targets))
+        self.y_hat ,self.loss,self.accuracy,self.aux_loss=self.forward( paddle.to_tensor(features), paddle.to_tensor(targets),tag="train/")
         loss, accuracy, aux_loss, probs =self.loss, self.accuracy, self.aux_loss,  self.y_hat
         return loss, accuracy, aux_loss, probs
 
     def calculate(self, sess, features, targets):
         self.eval()
-        self.y_hat ,self.loss,self.accuracy,self.aux_loss=self.forward( paddle.to_tensor(features), paddle.to_tensor(targets))
+        self.y_hat ,self.loss,self.accuracy,self.aux_loss=self.forward( paddle.to_tensor(features), paddle.to_tensor(targets),tag="test/")
         loss, accuracy, aux_loss, probs =self.loss, self.accuracy, self.aux_loss,  self.y_hat
         return loss, accuracy, aux_loss, probs
 
@@ -269,8 +268,8 @@ class Model_DMR(Model):
         self.dm_item_biases = tf.get_variable('dm_item_biases', [cate_size], initializer=tf.zeros_initializer(),
                                              trainable=False)
 
-    def forward(self, feature_ph, target_ph):
-        super(Model_DMR,self).forward(feature_ph, target_ph)
+    def forward(self, feature_ph, target_ph,tag=""):
+        super(Model_DMR,self).forward(feature_ph, target_ph,tag)
 
         self.position_his_eb = tf.nn.embedding_lookup(self.position_embeddings_var, self.position_his)  # T,E
         self.position_his_eb = tf.tile(self.position_his_eb, [tf.shape(self.mid)[0], 1])  # B*T,E
@@ -316,4 +315,4 @@ class Model_DMR(Model):
 
         inp = tf.concat([self.user_feat, self.item_feat, self.context_feat, self.item_his_eb_sum,
                          self.item_eb * self.item_his_eb_sum, rel_u2i, rel_i2i, att_outputs], -1)
-        return self.build_fcn_net(inp)
+        return self.build_fcn_net(inp,tag)
