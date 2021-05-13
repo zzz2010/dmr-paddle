@@ -16,7 +16,7 @@ batch_size =   256
 window_size = 50
 starter_learning_rate = 0.001
 learning_rate_decay = 1.0
-data_path="/home/aistudio/data/data84597/"
+data_path="/home/aistudio/work/"
 today = datetime.today() + timedelta(0)
 today_format = today.strftime('%Y%m%d')
 ckpt_dir = 'ckpt/dmr_' + today_format
@@ -44,6 +44,7 @@ def full_train():
                 loss, acc, aux_loss, prob = model.train_batch(None, features, targets)
                 loss.backward()
                 adam_optim.minimize(loss)
+                adam_optim.clear_grad()
                 loss_sum += loss.numpy()
                 accuracy_sum += acc.numpy()
                 aux_loss_sum += aux_loss.numpy()
@@ -77,39 +78,41 @@ def small_train():
     # construct the model structure
     model = Model_DMR(in_features)
     adam_optim = paddle.optimizer.Adam(learning_rate=lr_scheduler,parameters=model.parameters())
+    for epoch in range(num_epochs):
+        iter = 0
+        test_iter = 30
+        loss_sum = 0.0
+        accuracy_sum = 0.
+        aux_loss_sum = 0.
+        stored_arr = []
 
-    iter = 0
-    test_iter = 1
-    loss_sum = 0.0
-    accuracy_sum = 0.
-    aux_loss_sum = 0.
-    stored_arr = []
 
-
-    for features, targets in train_data:
-        loss, acc, aux_loss, prob = model.train_batch(None, features, targets)
-        loss.backward()
-        adam_optim.minimize(loss)
-        loss_sum += loss.numpy()
-        accuracy_sum += acc.numpy()
-        aux_loss_sum += aux_loss.numpy()
-        prob_1 = prob.numpy()[:, 0].tolist()
-        target_1 = targets.tolist()
-        for p, t in zip(prob_1, target_1):
-            stored_arr.append([p, t])
-        iter += 1
-        if (iter % test_iter) == 0:
-            print(datetime.now().ctime())
-            print(
-                'iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
-                (iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
-                 calc_auc(stored_arr)))
-            loss_sum = 0.0
-            accuracy_sum = 0.0
-            aux_loss_sum = 0.0
-            stored_arr = []
-            # paddle.save(model.state_dict(),ckpt_dir+"/iter_"+str(iter)) ##see if model size very big
-            paddle.save(model.state_dict(), ckpt_dir + "/current" )
+        for features, targets in train_data:
+            loss, acc, aux_loss, prob = model.train_batch(None, features, targets)
+           
+            loss.backward()
+            adam_optim.minimize(loss)
+            adam_optim.clear_grad()
+            loss_sum += loss.numpy()
+            accuracy_sum += acc.numpy()
+            aux_loss_sum += aux_loss.numpy()
+            prob_1 = prob.numpy()[:, 0].tolist()
+            target_1 = targets.tolist()
+            for p, t in zip(prob_1, target_1):
+                stored_arr.append([p, t])
+            iter += 1
+            if (iter % test_iter) == 0:
+                print(datetime.now().ctime())
+                print(
+                    'EPOCH:%d |iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
+                    (epoch,iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
+                    calc_auc(stored_arr)))
+                loss_sum = 0.0
+                accuracy_sum = 0.0
+                aux_loss_sum = 0.0
+                stored_arr = []
+                # paddle.save(model.state_dict(),ckpt_dir+"/iter_"+str(iter)) ##see if model size very big
+                paddle.save(model.state_dict(), ckpt_dir + "/current" )
 
     print("session finished.")
 
