@@ -27,7 +27,7 @@ def equal(x, y, name=None):
 
 
 def range(start, limit=None, delta=1, dtype=None, name="range"):
-    return paddle.to_tensor(range(start, limit, delta, dtype, name))
+    return paddle.arange(start=0,end=start)
 
 
 def matmul(a, b, transpose_a=False, transpose_b=False, name=None):
