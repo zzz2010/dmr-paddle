@@ -242,8 +242,6 @@ class Model(paddle.nn.Layer):
                 return self.y_hat ,None,None,None
 
 
-
-
     def train_batch(self, sess, features, targets):
         self.train()
         self.y_hat ,self.loss,self.accuracy,self.aux_loss=self.forward( paddle.to_tensor(features), paddle.to_tensor(targets),tag="train/")

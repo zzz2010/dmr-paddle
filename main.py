@@ -11,10 +11,10 @@ import sys
 import random
 from datetime import timedelta, datetime
 
-num_epochs = 100
-batch_size =   256
+num_epochs = 10
+batch_size =  2560
 window_size = 50
-starter_learning_rate = 0.001
+starter_learning_rate = 0.01
 learning_rate_decay = 1.0
 data_path="/home/aistudio/work/"
 today = datetime.today() + timedelta(0)
@@ -35,7 +35,7 @@ def full_train():
             train_data = DataIterator(train_fn, batch_size, 20)
             print("loaded training data file:",train_fn)
             iter = 0
-            test_iter = 10
+            test_iter = 100
             loss_sum = 0.0
             accuracy_sum = 0.
             aux_loss_sum = 0.
@@ -80,7 +80,7 @@ def small_train():
     adam_optim = paddle.optimizer.Adam(learning_rate=lr_scheduler,parameters=model.parameters())
     for epoch in range(num_epochs):
         iter = 0
-        test_iter = 30
+        test_iter = 100
         loss_sum = 0.0
         accuracy_sum = 0.
         aux_loss_sum = 0.
@@ -117,6 +117,7 @@ def small_train():
     print("session finished.")
 
 def eval():
+    print("Evaluate On testing data")
     test_data = DataIterator(data_path+"alimama_test.txt.gz", batch_size, 20)
     model = Model_DMR(in_features)
     iter = 0
