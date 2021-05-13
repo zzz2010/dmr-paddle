@@ -228,6 +228,7 @@ class Model(paddle.nn.Layer):
         with tf.name_scope('Metrics'):
             if self.target_ph is not None:
                 # Cross-entropy loss and optimizer initialization
+                # print("mean self.target_ph:",paddle.mean(self.target_ph.astype("float32")))
                 ctr_loss = tf.reduce_mean(
                     tf.nn.sigmoid_cross_entropy_with_logits(labels=self.target_ph, logits=tf.reduce_sum(dnn3, 1)))
                 self.ctr_loss = ctr_loss

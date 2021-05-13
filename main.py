@@ -103,10 +103,12 @@ def small_train():
             iter += 1
             if (iter % test_iter) == 0:
                 print(datetime.now().ctime())
+                auc_score=calc_auc(stored_arr)
+                tf.summary.scalar("train/auc",auc_score)
                 print(
                     'EPOCH:%d |iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
                     (epoch,iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
-                    calc_auc(stored_arr)))
+                      auc_score ))
                 loss_sum = 0.0
                 accuracy_sum = 0.0
                 aux_loss_sum = 0.0
@@ -143,10 +145,11 @@ def eval():
         iter += 1
         if (iter % test_iter) == 0:
             print(datetime.now().ctime())
-
+            auc_score=calc_auc(stored_arr)
+            tf.summary.scalar("test/auc",auc_score)
             print(
                 'iter: %d ----> test_loss: %.4f ---- test_accuracy: %.4f ---- test_aux_loss: %.4f ---- test_auc: %.4f' % \
-                (iter, loss_sum / iter, accuracy_sum / iter, aux_loss_sum / iter, calc_auc(stored_arr)))
+                (iter, loss_sum / iter, accuracy_sum / iter, aux_loss_sum / iter, auc_score))
     print("session finished.")
 
 
