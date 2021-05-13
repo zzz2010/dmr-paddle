@@ -14,6 +14,6 @@ def sampled_softmax_loss(weights,biases,labels,inputs,num_sampled=0,num_classes=
                                                            return_softmax=False,
                                                            axis=- 1)
 def learned_unigram_candidate_sampler(true_classes,num_true,num_sampled,unique,range_max,seed=None,name=None):
-    print("learned_unigram_candidate_sampler not implement")
+
     return None
 
