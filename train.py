@@ -12,7 +12,7 @@ import random
 from datetime import timedelta, datetime
 
 num_epochs = 100
-batch_size = 4  # 256
+batch_size =   256
 window_size = 50
 starter_learning_rate = 0.001
 learning_rate_decay = 1.0
