@@ -16,11 +16,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--num_epochs', help='num epochs',type=int, default=10)
 parser.add_argument('--batch_size', help='batch_size', type=int, default=2560)
 parser.add_argument('--window_size', help='window_size', type=int, default=50)
-parser.add_argument('--starter_learning_rate', help='starter_learning_rate', type=int, default=0.001)
+parser.add_argument('--starter_learning_rate', help='starter_learning_rate', type=float, default=0.001)
 parser.add_argument('--learning_rate_decay', help='learning_rate_decay', type=int, default=1.0)
 parser.add_argument('--data_path', help='data_path', type=str, default="/home/aistudio/work/")
 parser.add_argument('--ckpt_dir', help='ckpt_dir', type=str, default='ckpt/dmr_')
-parser.add_argument('--mode', help='mode', choices=['train', 'test', 'infer'],type=str, default='train')
+parser.add_argument('--mode', help='mode', choices=['train', 'test', 'demo'],type=str, default='train')
 args = parser.parse_args()
 
 
@@ -133,7 +133,7 @@ def small_train():
 
 def eval():
     print("Evaluate On testing data")
-    test_data = DataIterator(data_path+"alimama_test.txt.gz", batch_size, 20)
+    test_data = DataIterator(data_path+"alimama_test.txt.gz", batch_size*5, 20)
     model = Model_DMR(in_features)
     iter = 0
     test_iter = 100
