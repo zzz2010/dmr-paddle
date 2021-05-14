@@ -51,8 +51,13 @@ def full_train():
     train_data=None
     train_fns=glob.glob(data_path+"/alimama_train_*.txt.gz")
     if data_path.endswith(".csv"):
-        train_data = paddle.io.DataLoader.from_generator(capacity=1 )
-        train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
+        # train_data = paddle.io.DataLoader.from_generator(capacity=1 )
+        # train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
+        train_data = CSVDataset(data_path)
+        train_data = paddle.io.DataLoader(train_data,
+                                          batch_size=batch_size,
+                                          shuffle=True,
+                                          drop_last=False)
         train_fns = [data_path]
         print("loaded training data file:",data_path)
     best_loss=10000000000
@@ -60,7 +65,12 @@ def full_train():
         for train_fn in train_fns:
             if not data_path.endswith(".csv"):
                 train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
-                train_data.set_batch_generator(reader_data(train_fn, batch_size, 20))  
+                train_data.set_batch_generator(reader_data(train_fn, batch_size, 20))
+                # train_data = CSVDataset(train_fn)
+                # train_data = paddle.io.DataLoader(train_data,
+                #                                   batch_size=batch_size,
+                #                                   shuffle=True,
+                #                                   drop_last=False)
                 print("loaded training data file:",train_fn)
             iter = 0
             test_iter = 100
@@ -69,7 +79,7 @@ def full_train():
             aux_loss_sum = 0.
             stored_arr = []
             for features, targets in train_data:
-                loss, acc, aux_loss, prob = model.train_batch(None, features, targets)
+                loss, acc, aux_loss, prob = model.train_batch(None, features, targets.astype("float32"))
                 loss.backward()
                 adam_optim.minimize(loss)
                 adam_optim.clear_grad()
@@ -98,14 +108,18 @@ def full_train():
 
     print("session finished.")
 
-
+from csvdataset import CSVDataset
 def small_train():
     print("DEMO Purpose only: training on small sample dataset")
     batch_size=256
     train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
     train_data.set_batch_generator(reader_data('alimama_sampled.txt', batch_size, 20))
-    # train_data = reader_data('alimama_sampled.txt', batch_size, 20)()
 
+    # train_data=CSVDataset('alimama_sampled.txt')
+    # train_data=paddle.io.DataLoader(train_data,
+    #                      batch_size=batch_size,
+    #                      shuffle=True,
+    #                      drop_last=False)
 
     lr_scheduler=paddle.optimizer.lr.ExponentialDecay(starter_learning_rate,gamma=learning_rate_decay,last_epoch=2000000)
 
@@ -122,7 +136,7 @@ def small_train():
 
 
         for features, targets in train_data:
-            loss, acc, aux_loss, prob = model.train_batch(None, features, targets)
+            loss, acc, aux_loss, prob = model.train_batch(None, features, targets.astype("float32"))
            
             loss.backward()
             adam_optim.minimize(loss)
@@ -154,8 +168,13 @@ def small_train():
 
 def eval():
     print("Evaluate On testing data")
-    test_data = paddle.io.DataLoader.from_generator(capacity=1 )
-    test_data.set_batch_generator(reader_data(data_path+"alimama_test.txt.gz", batch_size, 20))
+    # test_data = paddle.io.DataLoader.from_generator(capacity=1 )
+    # test_data.set_batch_generator(reader_data(data_path+"alimama_test.txt.gz", batch_size, 20))
+    test_data = CSVDataset(data_path+"alimama_test.txt.gz")
+    test_data = paddle.io.DataLoader(test_data,
+                                      batch_size=batch_size*5,
+                                      shuffle=False,
+                                      drop_last=False)
     model = Model_DMR(in_features)
     iter = 0
     test_iter = 100
@@ -167,9 +186,9 @@ def eval():
     if len(load_model) > 1:
         model.load_dict(paddle.load(load_model))
         print("successfully loaded model from ", load_model)
-
+    model.eval()
     for features, targets in test_data:
-        loss, acc, aux_loss, prob = model.calculate(None, features, targets)
+        loss, acc, aux_loss, prob = model.calculate(None, features, targets.astype("float32"))
         loss_sum += loss.numpy()
         accuracy_sum += acc.numpy()
         aux_loss_sum += aux_loss.numpy()

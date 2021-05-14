@@ -60,8 +60,8 @@ class Model(object):
             self.campaign_id = tf.cast(self.feature_ph[:, 261], tf.int32)
             self.customer = tf.cast(self.feature_ph[:, 262], tf.int32)
             self.brand = tf.cast(self.feature_ph[:, 263], tf.int32)
-            self.price = tf.expand_dims(tf.cast(self.feature_ph[:, 264], tf.float32), 1)
-
+            self.price = tf.expand_dims(tf.cast(self.feature_ph[:, 264], tf.float32)*1e-6, 1)
+            self.price.stop_gradient=True
             self.pid = tf.cast(self.feature_ph[:, 265], tf.int32)
 
         # Embedding layer

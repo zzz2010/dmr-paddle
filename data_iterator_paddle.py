@@ -36,9 +36,10 @@ def reader_data(source0, batch_size0=256, max_batch_size0=20):
                     ss = source_buffer.pop()
                 except IndexError:
                     break
+                ss[264]=int(float(ss[264])*1000000)
                 source.append(ss[:-1])
                 target.append(ss[-1])
-            source =  np.array(source, np.float32)
+            source =  np.array(source, np.int32)
             target =  np.array(target, np.float32)
             yield source, target
 

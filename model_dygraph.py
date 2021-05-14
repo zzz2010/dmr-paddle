@@ -107,35 +107,64 @@ class Model(paddle.nn.Layer):
     def forward(self, feature_ph, target_ph,tag=""):
 
         self.feature_ph = feature_ph
-        self.target_ph = target_ph
+        self.target_ph =target_ph
 
         ## behavior history feature
-        self.btag_his = tf.cast(self.feature_ph[:, 0:50], tf.int32)
-        self.cate_his = tf.cast(self.feature_ph[:, 50:100], tf.int32)
-        self.brand_his = tf.cast(self.feature_ph[:, 100:150], tf.int32)
-        self.mask = tf.cast(self.feature_ph[:, 150:200], tf.int32)
-        self.match_mask = tf.cast(self.feature_ph[:, 200:250], tf.int32)
+
+        self.btag_his =  self.feature_ph[:, 0:50]
+        self.cate_his = self.feature_ph[:, 50:100]
+        self.brand_his = self.feature_ph[:, 100:150]
+        self.mask =  self.feature_ph[:, 150:200]
+        self.match_mask =  self.feature_ph[:, 200:250]
 
         # user side features
-        self.uid = tf.cast(self.feature_ph[:, 250], tf.int32)
-        self.cms_segid = tf.cast(self.feature_ph[:, 251], tf.int32)
-        self.cms_group_id = tf.cast(self.feature_ph[:, 252], tf.int32)
-        self.final_gender_code = tf.cast(self.feature_ph[:, 253], tf.int32)
-        self.age_level = tf.cast(self.feature_ph[:, 254], tf.int32)
-        self.pvalue_level = tf.cast(self.feature_ph[:, 255], tf.int32)
-        self.shopping_level = tf.cast(self.feature_ph[:, 256], tf.int32)
-        self.occupation = tf.cast(self.feature_ph[:, 257], tf.int32)
-        self.new_user_class_level = tf.cast(self.feature_ph[:, 258], tf.int32)
+        self.uid =  self.feature_ph[:, 250]
+        self.cms_segid = self.feature_ph[:, 251]
+        self.cms_group_id =  self.feature_ph[:, 252]
+        self.final_gender_code = self.feature_ph[:, 253]
+        self.age_level =  self.feature_ph[:, 254]
+        self.pvalue_level =  self.feature_ph[:, 255]
+        self.shopping_level = self.feature_ph[:, 256]
+        self.occupation =  self.feature_ph[:, 257]
+        self.new_user_class_level = self.feature_ph[:, 258]
 
         ##ad side features
-        self.mid = tf.cast(self.feature_ph[:, 259], tf.int32)
-        self.cate_id = tf.cast(self.feature_ph[:, 260], tf.int32)
-        self.campaign_id = tf.cast(self.feature_ph[:, 261], tf.int32)
-        self.customer = tf.cast(self.feature_ph[:, 262], tf.int32)
-        self.brand = tf.cast(self.feature_ph[:, 263], tf.int32)
-        self.price = tf.expand_dims(tf.cast(self.feature_ph[:, 264], tf.float32), 1)
+        self.mid =  self.feature_ph[:, 259]
+        self.cate_id =  self.feature_ph[:, 260]
+        self.campaign_id =  self.feature_ph[:, 261]
+        self.customer =  self.feature_ph[:, 262]
+        self.brand =  self.feature_ph[:, 263]
 
-        self.pid = tf.cast(self.feature_ph[:, 265], tf.int32)
+        #
+        # self.btag_his = tf.cast(self.feature_ph[:, 0:50], tf.int32)
+        # self.cate_his = tf.cast(self.feature_ph[:, 50:100], tf.int32)
+        # self.brand_his = tf.cast(self.feature_ph[:, 100:150], tf.int32)
+        # self.mask = tf.cast(self.feature_ph[:, 150:200], tf.int32)
+        # self.match_mask = tf.cast(self.feature_ph[:, 200:250], tf.int32)
+        #
+        # # user side features
+        # self.uid = tf.cast(self.feature_ph[:, 250], tf.int32)
+        # self.cms_segid = tf.cast(self.feature_ph[:, 251], tf.int32)
+        # self.cms_group_id = tf.cast(self.feature_ph[:, 252], tf.int32)
+        # self.final_gender_code = tf.cast(self.feature_ph[:, 253], tf.int32)
+        # self.age_level = tf.cast(self.feature_ph[:, 254], tf.int32)
+        # self.pvalue_level = tf.cast(self.feature_ph[:, 255], tf.int32)
+        # self.shopping_level = tf.cast(self.feature_ph[:, 256], tf.int32)
+        # self.occupation = tf.cast(self.feature_ph[:, 257], tf.int32)
+        # self.new_user_class_level = tf.cast(self.feature_ph[:, 258], tf.int32)
+        #
+        # ##ad side features
+        # self.mid = tf.cast(self.feature_ph[:, 259], tf.int32)
+        # self.cate_id = tf.cast(self.feature_ph[:, 260], tf.int32)
+        # self.campaign_id = tf.cast(self.feature_ph[:, 261], tf.int32)
+        # self.customer = tf.cast(self.feature_ph[:, 262], tf.int32)
+        # self.brand = tf.cast(self.feature_ph[:, 263], tf.int32)
+        # self.pid = tf.cast(self.feature_ph[:, 265], tf.int32)
+        self.price = tf.expand_dims(tf.cast(self.feature_ph[:, 264], tf.float32)*1e-6, 1)
+        self.pid =  self.feature_ph[:, 265]
+
+
+
 
 
 
@@ -229,12 +258,11 @@ class Model(paddle.nn.Layer):
             if self.target_ph is not None:
                 # Cross-entropy loss and optimizer initialization
                 # print("mean self.target_ph:",paddle.mean(self.target_ph.astype("float32")))
-                positive_rate=tf.reduce_mean(self.target_ph.astype("float32"))
+                positive_rate=tf.reduce_mean(self.target_ph )
                 ##rebalance the class weight
                 weights=paddle.index_select(tf.concat([positive_rate,1-positive_rate],0), self.target_ph.astype("int"))
-                # print(weights.shape)
                 ctr_loss = tf.reduce_mean(
-                    tf.nn.sigmoid_cross_entropy_with_logits(labels=self.target_ph, logits=tf.reduce_sum(dnn3, 1)*weights))
+                    tf.nn.sigmoid_cross_entropy_with_logits(labels=self.target_ph, logits=tf.reduce_sum(dnn3, 1))*weights)
                 
 
                 ####explict optimize AUC based on https://github.com/mlarionov/machine_learning_POC/blob/master/auc/pairwise.ipynb

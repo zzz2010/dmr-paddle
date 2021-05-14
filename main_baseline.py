@@ -20,7 +20,7 @@ parser.add_argument('--window_size', help='window_size', type=int, default=50)
 parser.add_argument('--starter_learning_rate', help='starter_learning_rate', type=float, default=0.001)
 parser.add_argument('--learning_rate_decay', help='learning_rate_decay', type=int, default=1.0)
 parser.add_argument('--data_path', help='data_path', type=str, default="/home/aistudio/work/")
-parser.add_argument('--ckpt_dir', help='ckpt_dir', type=str, default='ckpt/dmr_')
+parser.add_argument('--ckpt_dir', help='ckpt_dir', type=str, default='ckpt/baseline_')
 parser.add_argument('--load_model', help='model checkpoint path', type=str, default='')
 parser.add_argument('--mode', help='mode', choices=['train', 'test', 'demo'],type=str, default='train')
 args = parser.parse_args()
@@ -98,14 +98,19 @@ def full_train():
 
     print("session finished.")
 
-
+from csvdataset import  CSVDataset
 def small_train():
     print("DEMO Purpose only: training on small sample dataset")
     batch_size=256
-    train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
-    train_data.set_batch_generator(reader_data('alimama_sampled.txt', batch_size, 20))
+    # train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+    # train_data.set_batch_generator(reader_data('alimama_sampled.txt', batch_size, 20))
     # train_data = reader_data('alimama_sampled.txt', batch_size, 20)()
 
+    train_data=CSVDataset('alimama_sampled.txt')
+    train_data=paddle.io.DataLoader(train_data,
+                         batch_size=batch_size,
+                         shuffle=True,
+                         drop_last=False)
 
     lr_scheduler=paddle.optimizer.lr.ExponentialDecay(starter_learning_rate,gamma=learning_rate_decay,last_epoch=2000000)
 
