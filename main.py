@@ -5,7 +5,7 @@ import paddle
 
 import argparse
 from model_dygraph import *
-from data_iterator import *
+from data_iterator_paddle import *
 import numpy as np
 import paddtf as tf
 import sys
@@ -31,7 +31,7 @@ starter_learning_rate = args.starter_learning_rate
 learning_rate_decay = args.learning_rate_decay
 data_path= args.data_path
 today = datetime.today() + timedelta(0)
-ckpt_dir = args.ckpt_dir + f'epoch{num_epochs}_bs{batch_size}_lr{starter_learning_rate}'
+ckpt_dir = args.ckpt_dir + f'{os.path.basename(data_path)}_epoch{num_epochs}_bs{batch_size}_lr{starter_learning_rate}'
 os.makedirs(ckpt_dir,exist_ok=True)
 
 in_features = 16
@@ -45,13 +45,15 @@ def full_train():
     train_data=None
     train_fns=glob.glob(data_path+"/alimama_train_*.txt.gz")
     if data_path.endswith(".csv"):
-        train_data = DataIterator(data_path, batch_size, 20)
+        train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+        train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
         train_fns = [data_path]
         print("loaded training data file:",data_path)
     for epoch in range(num_epochs):
         for train_fn in train_fns:
             if not data_path.endswith(".csv"):
-                train_data = DataIterator(train_fn, batch_size, 20)
+                train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+                train_data.set_batch_generator(reader_data(train_fn, batch_size, 20))  
                 print("loaded training data file:",train_fn)
             iter = 0
             test_iter = 100
@@ -68,15 +70,15 @@ def full_train():
                 accuracy_sum += acc.numpy()
                 aux_loss_sum += aux_loss.numpy()
                 prob_1 = prob.numpy()[:, 0].tolist()
-                target_1 = targets.tolist()
+                target_1 = targets.numpy().tolist()
                 for p, t in zip(prob_1, target_1):
                     stored_arr.append([p, t])
                 iter += 1
                 if (iter % test_iter) == 0:
                     print(datetime.now().ctime())
                     print(
-                        'EPOCH:%d |iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
-                        (epoch,iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
+                        '%s|EPOCH:%d |iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
+                        (os.path.basename(data_path).replace(".csv",""),epoch,iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
                         calc_auc(stored_arr)))
                     loss_sum = 0.0
                     accuracy_sum = 0.0
@@ -90,7 +92,7 @@ def full_train():
 def small_train():
     print("DEMO Purpose only: training on small sample dataset")
     batch_size=256
-    train_data = DataIterator('alimama_sampled.txt', batch_size, 20)
+    train_data = reader_data('alimama_sampled.txt', batch_size, 20)() 
 
 
     lr_scheduler=paddle.optimizer.lr.ExponentialDecay(starter_learning_rate,gamma=learning_rate_decay,last_epoch=2000000)
@@ -140,7 +142,8 @@ def small_train():
 
 def eval():
     print("Evaluate On testing data")
-    test_data = DataIterator(data_path+"alimama_test.txt.gz", batch_size*5, 20)
+    test_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+    test_data.set_batch_generator(reader_data(data_path+"alimama_test.txt.gz", batch_size, 20))
     model = Model_DMR(in_features)
     iter = 0
     test_iter = 100
@@ -159,7 +162,7 @@ def eval():
         accuracy_sum += acc.numpy()
         aux_loss_sum += aux_loss.numpy()
         prob_1 = prob[:, 0].numpy().tolist()
-        target_1 = targets.tolist()
+        target_1 = targets.numpy().tolist()
         for p, t in zip(prob_1, target_1):
             stored_arr.append([p, t])
         iter += 1

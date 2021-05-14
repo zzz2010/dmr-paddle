@@ -260,7 +260,7 @@ class Model(paddle.nn.Layer):
 
     def train_batch(self, sess, features, targets):
         self.train()
-        self.y_hat ,self.loss,self.accuracy,self.aux_loss=self.forward( paddle.to_tensor(features), paddle.to_tensor(targets),tag="train/")
+        self.y_hat ,self.loss,self.accuracy,self.aux_loss=self.forward(  features,  targets,tag="train/")
         loss, accuracy, aux_loss, probs =self.loss, self.accuracy, self.aux_loss,  self.y_hat
         return loss, accuracy, aux_loss, probs
 

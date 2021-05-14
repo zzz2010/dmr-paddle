@@ -34,7 +34,9 @@ def full_train():
     for epoch in range(num_epochs):
         for train_fn in glob.glob(data_path+"/alimama_train_*.txt.gz"):
             # train_data = DataIterator(train_fn, batch_size, 20)
-            train_data = reader_data(train_fn, batch_size, 20)()
+            train_data = paddle.io.DataLoader.from_generator(capacity=20,use_multiprocess=True,use_double_buffer=True)
+            train_data.set_batch_generator(reader_data(train_fn, batch_size, 20))
+            # train_data = reader_data(train_fn, batch_size, 20)()
             print("loaded training data file:",train_fn)
             iter = 0
             test_iter = 10
@@ -51,7 +53,7 @@ def full_train():
                 accuracy_sum += acc.numpy()
                 aux_loss_sum += aux_loss.numpy()
                 prob_1 = prob.numpy()[:, 0].tolist()
-                target_1 = targets.tolist()
+                target_1 = targets.numpy().tolist()
                 for p, t in zip(prob_1, target_1):
                     stored_arr.append([p, t])
                 iter += 1
@@ -99,7 +101,7 @@ def small_train():
             accuracy_sum += acc.numpy()
             aux_loss_sum += aux_loss.numpy()
             prob_1 = prob.numpy()[:, 0].tolist()
-            target_1 = targets.tolist()
+            target_1 = targets.numpy().tolist()
             for p, t in zip(prob_1, target_1):
                 stored_arr.append([p, t])
             iter += 1
