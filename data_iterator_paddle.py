@@ -28,7 +28,7 @@ def reader_data(source0, batch_size0=256, max_batch_size0=20):
             if len(source_buffer) == 0:
                 end_of_data = False
                 source_fhandle.seek(0)
-                raise StopIteration
+                return
             source = []
             target = []
             for _ in range(batch_size):
@@ -44,7 +44,7 @@ def reader_data(source0, batch_size0=256, max_batch_size0=20):
 
         end_of_data = False
         source_fhandle.seek(0)
-        raise StopIteration
+        return 
 
     return __reader__
 
