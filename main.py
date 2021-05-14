@@ -18,8 +18,7 @@ starter_learning_rate = 0.01
 learning_rate_decay = 1.0
 data_path="/home/aistudio/work/"
 today = datetime.today() + timedelta(0)
-today_format = today.strftime('%Y%m%d')
-ckpt_dir = 'ckpt/dmr_' + today_format
+ckpt_dir = 'ckpt/dmr_' + f'epoch{num_epochs}_bs{batch_size}_lr{starter_learning_rate}'
 os.makedirs(ckpt_dir,exist_ok=True)
 
 in_features = 16
