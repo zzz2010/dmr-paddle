@@ -281,6 +281,7 @@ class Model_DMR(Model):
         self.dm_item_vectors = tf.get_variable("dm_item_vectors", [cate_size, main_embedding_size])
         self.dm_item_biases = tf.get_variable('dm_item_biases', [cate_size], initializer=tf.zeros_initializer(),
                                              trainable=False)
+        self.dm_position_his = tf.range(50)
 
     def forward(self, feature_ph, target_ph,tag=""):
         super(Model_DMR,self).forward(feature_ph, target_ph,tag)
@@ -291,7 +292,7 @@ class Model_DMR(Model):
                                                                  self.position_his_eb.shape[
                                                                      1]])  # B,T,E
 
-        self.dm_position_his = tf.range(50)
+
 
         self.dm_position_his_eb = tf.nn.embedding_lookup(self.dm_position_embeddings_var, self.dm_position_his)  # T,E
         self.dm_position_his_eb = tf.tile(self.dm_position_his_eb, [tf.shape(self.mid)[0], 1])  # B*T,E

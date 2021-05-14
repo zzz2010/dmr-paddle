@@ -70,6 +70,7 @@ def full_train():
 
 def small_train():
     print("DEMO Purpose only: training on small sample dataset")
+    batch_size=256
     train_data = DataIterator('alimama_sampled.txt', batch_size, 20)
 
 
@@ -80,7 +81,7 @@ def small_train():
     adam_optim = paddle.optimizer.Adam(learning_rate=lr_scheduler,parameters=model.parameters())
     for epoch in range(num_epochs):
         iter = 0
-        test_iter = 100
+        test_iter = 10
         loss_sum = 0.0
         accuracy_sum = 0.
         aux_loss_sum = 0.
