@@ -45,10 +45,11 @@ def full_train():
     train_data=None
     train_fns=glob.glob(data_path+"/alimama_train_*.txt.gz")
     if data_path.endswith(".csv"):
-        train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+        train_data = paddle.io.DataLoader.from_generator(capacity=1 )
         train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
         train_fns = [data_path]
         print("loaded training data file:",data_path)
+    best_loss=10000000000
     for epoch in range(num_epochs):
         for train_fn in train_fns:
             if not data_path.endswith(".csv"):
@@ -80,6 +81,9 @@ def full_train():
                         '%s|EPOCH:%d |iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
                         (os.path.basename(data_path).replace(".csv",""),epoch,iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
                         calc_auc(stored_arr)))
+                    if best_loss>loss_sum:
+                        best_loss=loss_sum
+                        paddle.save(model.state_dict(), ckpt_dir + "/best" )
                     loss_sum = 0.0
                     accuracy_sum = 0.0
                     aux_loss_sum = 0.0
@@ -142,7 +146,7 @@ def small_train():
 
 def eval():
     print("Evaluate On testing data")
-    test_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+    test_data = paddle.io.DataLoader.from_generator(capacity=1 )
     test_data.set_batch_generator(reader_data(data_path+"alimama_test.txt.gz", batch_size, 20))
     model = Model_DMR(in_features)
     iter = 0
@@ -151,7 +155,8 @@ def eval():
     accuracy_sum = 0.
     aux_loss_sum = 0.
     stored_arr = []
-
+    global ckpt_dir
+    ckpt_dir=ckpt_dir.replace("__","_train.csv_")
 
     model.load_dict(paddle.load(ckpt_dir + "/current"))
     print("model loaded from:",ckpt_dir + "/current")
