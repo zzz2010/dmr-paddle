@@ -51,13 +51,13 @@ def full_train():
     train_data=None
     train_fns=glob.glob(data_path+"/alimama_train_*.txt.gz")
     if data_path.endswith(".csv"):
-        # train_data = paddle.io.DataLoader.from_generator(capacity=1 )
-        # train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
-        train_data = CSVDataset(data_path)
-        train_data = paddle.io.DataLoader(train_data,
-                                          batch_size=batch_size,
-                                          shuffle=True,
-                                          drop_last=False)
+        train_data = paddle.io.DataLoader.from_generator(capacity=1 )
+        train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
+        # train_data = CSVDataset(data_path)
+        # train_data = paddle.io.DataLoader(train_data,
+        #                                   batch_size=batch_size,
+        #                                   shuffle=True,
+        #                                   drop_last=False)
         train_fns = [data_path]
         print("loaded training data file:",data_path)
     best_loss=10000000000
@@ -168,13 +168,13 @@ def small_train():
 
 def eval():
     print("Evaluate On testing data")
-    # test_data = paddle.io.DataLoader.from_generator(capacity=1 )
-    # test_data.set_batch_generator(reader_data(data_path+"alimama_test.txt.gz", batch_size, 20))
-    test_data = CSVDataset(data_path+"alimama_test.txt.gz")
-    test_data = paddle.io.DataLoader(test_data,
-                                      batch_size=batch_size*5,
-                                      shuffle=False,
-                                      drop_last=False)
+    test_data = paddle.io.DataLoader.from_generator(capacity=1 )
+    test_data.set_batch_generator(reader_data(data_path+"alimama_test.txt.gz", batch_size, 20))
+    # test_data = CSVDataset(data_path+"alimama_test.txt.gz")
+    # test_data = paddle.io.DataLoader(test_data,
+    #                                   batch_size=batch_size*5,
+    #                                   shuffle=False,
+    #                                   drop_last=False)
     model = Model_DMR(in_features)
     iter = 0
     test_iter = 100
