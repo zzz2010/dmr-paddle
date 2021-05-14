@@ -4,8 +4,8 @@ import os
 import paddle
 
 import argparse
-from model_dygraph import *
-# from model_baseline import *
+# from model_dygraph import *
+from model_baseline import *
 from data_iterator_paddle import *
 import numpy as np
 import paddtf as tf
