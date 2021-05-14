@@ -20,6 +20,7 @@ parser.add_argument('--starter_learning_rate', help='starter_learning_rate', typ
 parser.add_argument('--learning_rate_decay', help='learning_rate_decay', type=int, default=1.0)
 parser.add_argument('--data_path', help='data_path', type=str, default="/home/aistudio/work/")
 parser.add_argument('--ckpt_dir', help='ckpt_dir', type=str, default='ckpt/dmr_')
+parser.add_argument('--load_model', help='model checkpoint path', type=str, default='')
 parser.add_argument('--mode', help='mode', choices=['train', 'test', 'demo'],type=str, default='train')
 args = parser.parse_args()
 
@@ -33,14 +34,18 @@ data_path= args.data_path
 today = datetime.today() + timedelta(0)
 ckpt_dir = args.ckpt_dir + f'{os.path.basename(data_path)}_epoch{num_epochs}_bs{batch_size}_lr{starter_learning_rate}'
 os.makedirs(ckpt_dir,exist_ok=True)
+load_model=args.load_model
 
 in_features = 16
 def full_train():
     lr_scheduler=paddle.optimizer.lr.ExponentialDecay(starter_learning_rate,gamma=learning_rate_decay,last_epoch=2000000)
-    
+    global load_model
     # construct the model structure
     model = Model_DMR(in_features)
     adam_optim = paddle.optimizer.Adam(learning_rate=lr_scheduler,parameters=model.parameters())
+    if len(load_model)>1:
+        model.load_dict(paddle.load(load_model))
+        print("successfully loaded model from ",load_model)
     import glob
     train_data=None
     train_fns=glob.glob(data_path+"/alimama_train_*.txt.gz")
@@ -157,11 +162,10 @@ def eval():
     accuracy_sum = 0.
     aux_loss_sum = 0.
     stored_arr = []
-    global ckpt_dir
-    ckpt_dir=ckpt_dir.replace("__","_train.csv_")
-
-    model.load_dict(paddle.load(ckpt_dir + "/current"))
-    print("model loaded from:",ckpt_dir + "/current")
+    global  load_model
+    if len(load_model) > 1:
+        model.load_dict(paddle.load(load_model))
+        print("successfully loaded model from ", load_model)
 
     for features, targets in test_data:
         loss, acc, aux_loss, prob = model.calculate(None, features, targets)
