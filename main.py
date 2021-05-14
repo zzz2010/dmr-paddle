@@ -3,6 +3,7 @@ import os
 
 import paddle
 
+import argparse
 from model_dygraph import *
 from data_iterator import *
 import numpy as np
@@ -11,14 +12,26 @@ import sys
 import random
 from datetime import timedelta, datetime
 
-num_epochs = 10
-batch_size =  2560
-window_size = 50
-starter_learning_rate = 0.01
-learning_rate_decay = 1.0
-data_path="/home/aistudio/work/"
+parser = argparse.ArgumentParser()
+parser.add_argument('--num_epochs', help='num epochs',type=int, default=10)
+parser.add_argument('--batch_size', help='batch_size', type=int, default=2560)
+parser.add_argument('--window_size', help='window_size', type=int, default=50)
+parser.add_argument('--starter_learning_rate', help='starter_learning_rate', type=int, default=0.001)
+parser.add_argument('--learning_rate_decay', help='learning_rate_decay', type=int, default=1.0)
+parser.add_argument('--data_path', help='data_path', type=str, default="/home/aistudio/work/")
+parser.add_argument('--ckpt_dir', help='ckpt_dir', type=str, default='ckpt/dmr_')
+parser.add_argument('--mode', help='mode', choices=['train', 'test', 'infer'],type=str, default='train')
+args = parser.parse_args()
+
+
+num_epochs = args.num_epochs
+batch_size =  args.batch_size
+window_size = args.window_size
+starter_learning_rate = args.starter_learning_rate
+learning_rate_decay = args.learning_rate_decay
+data_path= args.data_path
 today = datetime.today() + timedelta(0)
-ckpt_dir = 'ckpt/dmr_' + f'epoch{num_epochs}_bs{batch_size}_lr{starter_learning_rate}'
+ckpt_dir = args.ckpt_dir + f'epoch{num_epochs}_bs{batch_size}_lr{starter_learning_rate}'
 os.makedirs(ckpt_dir,exist_ok=True)
 
 in_features = 16
@@ -156,13 +169,13 @@ def eval():
 if __name__ == "__main__":
     SEED = 3
     #
+    print("Parameters:",args)
     tf.set_random_seed(SEED)
     np.random.seed(SEED)
     random.seed(SEED)
-    print(sys.argv)
-    if sys.argv[1] == 'train':
+    if args.mode == 'train':
         full_train()
-    elif sys.argv[1] == 'test':
+    elif args.mode == 'test':
         eval()
     else:
         small_train()
