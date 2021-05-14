@@ -42,10 +42,17 @@ def full_train():
     model = Model_DMR(in_features)
     adam_optim = paddle.optimizer.Adam(learning_rate=lr_scheduler,parameters=model.parameters())
     import glob
+    train_data=None
+    train_fns=glob.glob(data_path+"/alimama_train_*.txt.gz")
+    if data_path.endswith(".csv"):
+        train_data = DataIterator(data_path, batch_size, 20)
+        train_fns = [data_path]
+        print("loaded training data file:",data_path)
     for epoch in range(num_epochs):
-        for train_fn in glob.glob(data_path+"/alimama_train_*.txt.gz"):
-            train_data = DataIterator(train_fn, batch_size, 20)
-            print("loaded training data file:",train_fn)
+        for train_fn in train_fns:
+            if not data_path.endswith(".csv"):
+                train_data = DataIterator(train_fn, batch_size, 20)
+                print("loaded training data file:",train_fn)
             iter = 0
             test_iter = 100
             loss_sum = 0.0
