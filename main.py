@@ -96,7 +96,9 @@ def full_train():
 def small_train():
     print("DEMO Purpose only: training on small sample dataset")
     batch_size=256
-    train_data = reader_data('alimama_sampled.txt', batch_size, 20)() 
+    train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+    train_data.set_batch_generator(reader_data('alimama_sampled.txt', batch_size, 20))
+    # train_data = reader_data('alimama_sampled.txt', batch_size, 20)()
 
 
     lr_scheduler=paddle.optimizer.lr.ExponentialDecay(starter_learning_rate,gamma=learning_rate_decay,last_epoch=2000000)
@@ -123,7 +125,7 @@ def small_train():
             accuracy_sum += acc.numpy()
             aux_loss_sum += aux_loss.numpy()
             prob_1 = prob.numpy()[:, 0].tolist()
-            target_1 = targets.tolist()
+            target_1 = targets.numpy().tolist()
             for p, t in zip(prob_1, target_1):
                 stored_arr.append([p, t])
             iter += 1
