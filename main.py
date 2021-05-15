@@ -14,8 +14,8 @@ import random
 from datetime import timedelta, datetime
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--num_epochs', help='num epochs',type=int, default=10)
-parser.add_argument('--batch_size', help='batch_size', type=int, default=2560)
+parser.add_argument('--num_epochs', help='num epochs',type=int, default=100)
+parser.add_argument('--batch_size', help='batch_size', type=int, default=12560)
 parser.add_argument('--window_size', help='window_size', type=int, default=50)
 parser.add_argument('--starter_learning_rate', help='starter_learning_rate', type=float, default=0.001)
 parser.add_argument('--learning_rate_decay', help='learning_rate_decay', type=int, default=1.0)
@@ -51,26 +51,26 @@ def full_train():
     train_data=None
     train_fns=glob.glob(data_path+"/alimama_train_*.txt.gz")
     if data_path.endswith(".csv"):
-        train_data = paddle.io.DataLoader.from_generator(capacity=1 )
-        train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
-        # train_data = CSVDataset(data_path)
-        # train_data = paddle.io.DataLoader(train_data,
-        #                                   batch_size=batch_size,
-        #                                   shuffle=True,
-        #                                   drop_last=False)
+        # train_data = paddle.io.DataLoader.from_generator(capacity=1 )
+        # train_data.set_batch_generator(reader_data(data_path, batch_size, 20))
+        train_data = CSVDataset(data_path)
+        train_data = paddle.io.DataLoader(train_data,
+                                          batch_size=batch_size,
+                                          shuffle=True,
+                                          drop_last=False)
         train_fns = [data_path]
         print("loaded training data file:",data_path)
     best_loss=10000000000
     for epoch in range(num_epochs):
         for train_fn in train_fns:
             if not data_path.endswith(".csv"):
-                train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
-                train_data.set_batch_generator(reader_data(train_fn, batch_size, 20))
-                # train_data = CSVDataset(train_fn)
-                # train_data = paddle.io.DataLoader(train_data,
-                #                                   batch_size=batch_size,
-                #                                   shuffle=True,
-                #                                   drop_last=False)
+                # train_data = paddle.io.DataLoader.from_generator(capacity=1,use_multiprocess=True,use_double_buffer=True)
+                # train_data.set_batch_generator(reader_data(train_fn, batch_size, 20))
+                train_data = CSVDataset(train_fn)
+                train_data = paddle.io.DataLoader(train_data,
+                                                  batch_size=batch_size,
+                                                  shuffle=True,
+                                                  drop_last=False)
                 print("loaded training data file:",train_fn)
             iter = 0
             test_iter = 100
@@ -83,27 +83,28 @@ def full_train():
                 loss.backward()
                 adam_optim.minimize(loss)
                 adam_optim.clear_grad()
-                loss_sum += loss.numpy()
-                accuracy_sum += acc.numpy()
-                aux_loss_sum += aux_loss.numpy()
-                prob_1 = prob.numpy()[:, 0].tolist()
-                target_1 = targets.numpy().tolist()
-                for p, t in zip(prob_1, target_1):
-                    stored_arr.append([p, t])
+                # loss_sum += loss.numpy()
+                # accuracy_sum += acc.numpy()
+                # aux_loss_sum += aux_loss.numpy()
+                # prob_1 = prob.numpy()[:, 0].tolist()
+                # target_1 = targets.numpy().tolist()
+                # for p, t in zip(prob_1, target_1):
+                #     stored_arr.append([p, t])
                 iter += 1
                 if (iter % test_iter) == 0:
-                    print(datetime.now().ctime())
-                    print(
-                        '%s|EPOCH:%d |iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
-                        (os.path.basename(data_path).replace(".csv",""),epoch,iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
-                        calc_auc(stored_arr)))
-                    if best_loss>loss_sum:
-                        best_loss=loss_sum
+                    print(loss)
+                #     print(datetime.now().ctime())
+                #     print(
+                #         '%s|EPOCH:%d |iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f ---- train_auc: %.4f' % \
+                #         (os.path.basename(data_path).replace(".csv",""),epoch,iter, loss_sum / test_iter, accuracy_sum / test_iter, aux_loss_sum / test_iter,
+                #         calc_auc(stored_arr)))
+                    if best_loss>loss:
+                        best_loss=loss
                         paddle.save(model.state_dict(), ckpt_dir + "/best" )
-                    loss_sum = 0.0
-                    accuracy_sum = 0.0
-                    aux_loss_sum = 0.0
-                    stored_arr = []
+                #     loss_sum = 0.0
+                #     accuracy_sum = 0.0
+                #     aux_loss_sum = 0.0
+                #     stored_arr = []
                     paddle.save(model.state_dict(), ckpt_dir + "/current" )
 
     print("session finished.")
