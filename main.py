@@ -169,7 +169,7 @@ def small_train():
 def eval():
     print("Evaluate On testing data")
     test_data = paddle.io.DataLoader.from_generator(capacity=1 )
-    test_data.set_batch_generator(reader_data(data_path+"alimama_test.txt.gz", batch_size, 20))
+    test_data.set_batch_generator(reader_data(data_path, batch_size, 20))
     # test_data = CSVDataset(data_path+"alimama_test.txt.gz")
     # test_data = paddle.io.DataLoader(test_data,
     #                                   batch_size=batch_size*5,
