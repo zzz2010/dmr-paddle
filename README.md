@@ -1,3 +1,10 @@
+
+## This is replementation of DMR using DL framework [PaddlePaddle](https://github.com/PaddlePaddle/Paddle).
+
+
+### This repo is modified based on original [tensorflow version](https://github.com/lvze92/DMR).
+
+
 # DMR
 Deep Match to Rank Model for Personalized Click-Through Rate Prediction
 
